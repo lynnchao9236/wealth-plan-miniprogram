@@ -1,0 +1,279 @@
+/* pages/monthly/monthly.wxss */
+.page-wrap {
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background: #F6F6F6;
+}
+
+.month-selector {
+  background: #FFFFFF;
+  border-bottom: 1rpx solid #E5E5E5;
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  box-sizing: border-box;
+  width: 100%;
+}
+
+.month-nav {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16rpx 16rpx;
+  box-sizing: border-box;
+  width: 100%;
+}
+
+.nav-btn {
+  width: 56rpx;
+  height: 56rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 36rpx;
+  color: #8A8A8A;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.nav-btn:active {
+  background: #F0F0F0;
+}
+
+.month-title {
+  font-size: 28rpx;
+  font-weight: 600;
+  flex: 1;
+  text-align: center;
+}
+
+.month-scroll {
+  white-space: nowrap;
+  padding: 0 16rpx 16rpx;
+}
+
+.month-scroll .month-pill {
+  display: inline-block;
+  margin-right: 8rpx;
+}
+
+.content-scroll {
+  flex: 1;
+  overflow: hidden;
+}
+
+.flex-between {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.flex-row {
+  display: flex;
+  align-items: center;
+}
+
+.tag-white {
+  background: rgba(255,255,255,0.2);
+  padding: 4rpx 16rpx;
+  border-radius: 20rpx;
+  font-size: 22rpx;
+}
+
+.text-bold { font-weight: 600; }
+.text-desc { color: #8A8A8A; }
+.text-sm { font-size: 24rpx; }
+
+/* 资金流向 */
+.flow-summary {
+  background: #F9F9F9;
+  border-radius: 16rpx;
+  padding: 16rpx;
+}
+
+.flow-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10rpx 0;
+}
+
+.flow-label {
+  font-size: 26rpx;
+  color: #666;
+}
+
+.flow-value {
+  font-size: 26rpx;
+  font-weight: 600;
+}
+
+.flow-divider {
+  height: 1rpx;
+  background: #E5E5E5;
+  margin: 8rpx 0;
+}
+
+/* 录入按钮 */
+.btn-primary {
+  background: linear-gradient(135deg, #8B5CF6, #7C3AED);
+  color: #FFFFFF;
+  border: none;
+  border-radius: 20rpx;
+  padding: 20rpx;
+  font-size: 28rpx;
+  font-weight: 600;
+  text-align: center;
+}
+
+.btn-primary:active {
+  opacity: 0.8;
+}
+
+/* 12月项 */
+.twelve-item {
+  display: flex;
+  align-items: center;
+  background: #FFFFFF;
+  border-radius: 16rpx;
+  padding: 20rpx 24rpx;
+  margin-bottom: 12rpx;
+  box-shadow: 0 1rpx 4rpx rgba(0,0,0,0.03);
+}
+
+.twelve-item.current {
+  border: 2rpx solid #07C160;
+  background: #F0FFF4;
+}
+
+/* ===== 录入本月实际情况（简化样式） ===== */
+.simple-section {
+  background: #FFFFFF;
+  border-radius: 20rpx;
+  padding: 8rpx 24rpx;
+  margin-bottom: 20rpx;
+  box-shadow: 0 1rpx 4rpx rgba(0, 0, 0, 0.03);
+}
+
+.simple-section-title {
+  display: flex;
+  align-items: center;
+  gap: 12rpx;
+  padding: 20rpx 0 16rpx;
+  font-size: 26rpx;
+  font-weight: 600;
+  color: #191919;
+  border-bottom: 1rpx solid #F0F0F0;
+}
+
+.simple-section-dot {
+  display: inline-block;
+  width: 6rpx;
+  height: 24rpx;
+  border-radius: 3rpx;
+}
+
+.simple-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 20rpx 0;
+  border-bottom: 1rpx solid #F5F5F5;
+  gap: 16rpx;
+}
+
+.simple-row.last {
+  border-bottom: none;
+}
+
+.simple-label {
+  font-size: 26rpx;
+  color: #4B5563;
+  flex-shrink: 0;
+}
+
+.simple-input {
+  flex: 1;
+  text-align: right;
+  font-size: 28rpx;
+  color: #191919;
+  padding: 8rpx 0;
+  min-height: 40rpx;
+}
+
+.simple-input-full {
+  width: 100%;
+  background: #F9F9F9;
+  border-radius: 12rpx;
+  padding: 18rpx 20rpx;
+  font-size: 26rpx;
+  color: #191919;
+  margin: 16rpx 0 20rpx;
+  box-sizing: border-box;
+}
+
+.simple-add-btn {
+  font-size: 22rpx;
+  color: #8B5CF6;
+  background: #F3F0FF;
+  padding: 6rpx 20rpx;
+  border-radius: 20rpx;
+  font-weight: 500;
+}
+
+.simple-custom-item {
+  background: #FAFAFA;
+  border-radius: 14rpx;
+  padding: 16rpx 20rpx;
+  margin: 16rpx 0;
+}
+
+.simple-empty {
+  text-align: center;
+  padding: 28rpx 0 20rpx;
+  font-size: 22rpx;
+  color: #8A8A8A;
+}
+
+/* 净现金变动趋势柱状图 */
+.cash-chart {
+  display: flex;
+  align-items: flex-end;
+  gap: 14rpx;
+  padding: 16rpx 0 8rpx;
+  overflow-x: auto;
+  min-height: 160rpx;
+}
+
+.cash-bar-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8rpx;
+  flex-shrink: 0;
+}
+
+.cash-bar-col {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-end;
+  height: 128rpx;
+}
+
+.cash-bar-label {
+  font-size: 20rpx;
+  color: #8A8A8A;
+  text-align: center;
+  width: 40rpx;
+}
+
+.cash-detail-tip {
+  display: flex;
+  align-items: center;
+  background: #F9F9F9;
+  border-radius: 12rpx;
+  padding: 12rpx 20rpx;
+  margin-top: 12rpx;
+}

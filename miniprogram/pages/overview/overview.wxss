@@ -1,0 +1,217 @@
+/* pages/overview/overview.wxss */
+
+/* 密码验证弹窗 */
+.pwd-mask {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: #F6F6F6;
+  z-index: 9999;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding-top: 160rpx;
+}
+
+.pwd-modal {
+  background: #fff;
+  border-radius: 24rpx;
+  padding: 60rpx 48rpx 48rpx;
+  width: 600rpx;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.pwd-lock-icon {
+  font-size: 80rpx;
+  margin-bottom: 20rpx;
+}
+
+.pwd-title {
+  font-size: 36rpx;
+  font-weight: 600;
+  color: #1a1a1a;
+  margin-bottom: 8rpx;
+}
+
+.pwd-subtitle {
+  font-size: 24rpx;
+  color: #8A8A8A;
+  margin-bottom: 40rpx;
+}
+
+.pwd-input {
+  width: 100%;
+  height: 88rpx;
+  background: #F6F6F6;
+  border-radius: 16rpx;
+  padding: 0 28rpx;
+  font-size: 32rpx;
+  letter-spacing: 4rpx;
+  box-sizing: border-box;
+  border: 2rpx solid #E0E0E0;
+}
+
+.pwd-error {
+  font-size: 24rpx;
+  color: #FA5151;
+  margin-top: 12rpx;
+  align-self: flex-start;
+}
+
+.pwd-btn {
+  width: 100%;
+  height: 88rpx;
+  background: #07C160;
+  color: #fff;
+  border-radius: 16rpx;
+  font-size: 32rpx;
+  font-weight: 600;
+  margin-top: 32rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+}
+
+.page-scroll {
+  height: 100vh;
+  background: #F6F6F6;
+}
+
+.flex-between {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.flex-row {
+  display: flex;
+  align-items: center;
+}
+
+.text-sm { font-size: 24rpx; }
+.text-bold { font-weight: 600; }
+.text-desc { color: #8A8A8A; }
+.opacity-80 { opacity: 0.8; }
+.opacity-90 { opacity: 0.9; }
+
+.tag-white {
+  background: rgba(255,255,255,0.2);
+  padding: 4rpx 16rpx;
+  border-radius: 20rpx;
+  font-size: 22rpx;
+}
+
+.asset-big {
+  font-size: 64rpx;
+  font-weight: bold;
+  display: block;
+  margin: 8rpx 0;
+}
+
+/* 增长时间轴 */
+.growth-timeline {
+  padding: 0;
+}
+
+.growth-item {
+  display: flex;
+  align-items: center;
+  gap: 16rpx;
+  margin-bottom: 12rpx;
+}
+
+.growth-year {
+  width: 80rpx;
+  font-size: 22rpx;
+  color: #8A8A8A;
+  flex-shrink: 0;
+  text-align: right;
+}
+
+.growth-bar-wrap {
+  flex: 1;
+  height: 20rpx;
+  background: #F0F0F0;
+  border-radius: 10rpx;
+  overflow: hidden;
+}
+
+.growth-bar-fill {
+  height: 20rpx;
+  border-radius: 10rpx;
+  transition: width 0.5s ease;
+}
+
+.growth-value {
+  width: 120rpx;
+  font-size: 22rpx;
+  font-weight: 600;
+  text-align: right;
+  flex-shrink: 0;
+}
+
+/* 投资组合 */
+.portfolio-item {
+  display: flex;
+  align-items: center;
+  gap: 12rpx;
+  margin-bottom: 16rpx;
+}
+
+.portfolio-bar-bg {
+  width: 200rpx;
+  height: 14rpx;
+  background: #F0F0F0;
+  border-radius: 7rpx;
+  flex-shrink: 0;
+}
+
+.portfolio-bar-fill {
+  height: 14rpx;
+  border-radius: 7rpx;
+}
+
+/* 签名 */
+.footer-sign {
+  text-align: center;
+  padding: 32rpx 0 60rpx;
+}
+
+/* 资产变化趋势柱状图 */
+.asset-trend-chart {
+  display: flex;
+  align-items: flex-end;
+  gap: 12rpx;
+  padding: 16rpx 0 8rpx;
+  overflow-x: auto;
+  min-height: 160rpx;
+}
+
+.asset-trend-bar-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8rpx;
+  flex-shrink: 0;
+}
+
+.asset-trend-label {
+  font-size: 20rpx;
+  color: #8A8A8A;
+  text-align: center;
+}
+
+/* 净现金变动趋势（monthly页复用） */
+.cash-detail-tip {
+  display: flex;
+  align-items: center;
+  background: #F9F9F9;
+  border-radius: 12rpx;
+  padding: 12rpx 20rpx;
+  margin-top: 12rpx;
+}

@@ -1,0 +1,222 @@
+<!--pages/monthly/monthly.wxml - 每月收支页-->
+<view class="page-wrap">
+  <!-- 月份选择器 -->
+  <view class="month-selector">
+    <view class="month-nav">
+      <view class="nav-btn" bindtap="prevMonth">‹</view>
+      <text class="month-title">{{monthDisplay}}</text>
+      <view class="nav-btn" bindtap="nextMonth">›</view>
+    </view>
+    <scroll-view scroll-x class="month-scroll" scroll-into-view="{{scrollIntoView}}">
+      <view class="month-pill {{item.key === currentMonth ? 'active' : ''}} {{item.hasRecord ? 'has-record' : ''}}"
+            wx:for="{{monthPills}}" wx:key="key"
+            id="pill-{{item.key}}"
+            bindtap="selectMonth" data-key="{{item.key}}">
+        {{item.label}}
+      </view>
+    </scroll-view>
+  </view>
+
+  <scroll-view scroll-y class="content-scroll">
+
+    <!-- 本月收支明细（仅有实际录入时显示） -->
+    <block wx:if="{{currentMonthHasRecord}}">
+      <view style="margin: 24rpx 24rpx 0;">
+        <view class="flex-between">
+          <text class="text-bold" style="font-size: 26rpx;">本月收支明细</text>
+          <text class="text-desc" style="font-size: 22rpx;">{{actionCount}}</text>
+        </view>
+      </view>
+
+      <!-- 收入 -->
+      <view wx:if="{{incomeItems.length > 0}}" style="margin: 16rpx 24rpx 0;">
+        <text style="font-size: 22rpx; color: #22C55E; font-weight: 600;">收入</text>
+        <view class="action-card" wx:for="{{incomeItems}}" wx:key="id" style="margin-top: 12rpx;">
+          <view class="flex-between">
+            <view class="flex-row" style="gap: 12rpx;">
+              <view class="status-dot {{item.isActual ? 'status-done' : 'status-planned'}}"></view>
+              <text class="text-bold" style="font-size: 26rpx;">{{item.label}}</text>
+            </view>
+            <text class="text-green text-bold" style="font-size: 26rpx;">+¥{{item.planned}}{{item.unit}}</text>
+          </view>
+          <text style="font-size: 22rpx; margin-top: 6rpx; display: block; color: {{item.isActual ? '#07C160' : '#8A8A8A'}};">{{item.desc}}</text>
+        </view>
+      </view>
+
+      <!-- 支出 -->
+      <view wx:if="{{expenseItems.length > 0}}" style="margin: 16rpx 24rpx 0;">
+        <text style="font-size: 22rpx; color: #FA5151; font-weight: 600;">支出</text>
+        <view class="action-card" wx:for="{{expenseItems}}" wx:key="id" style="margin-top: 12rpx;">
+          <view class="flex-between">
+            <view class="flex-row" style="gap: 12rpx;">
+              <view class="status-dot {{item.isActual ? 'status-done' : 'status-planned'}}"></view>
+              <text class="text-bold" style="font-size: 26rpx;">{{item.label}}</text>
+            </view>
+            <text class="text-red text-bold" style="font-size: 26rpx;">-¥{{item.planned}}{{item.unit}}</text>
+          </view>
+          <text style="font-size: 22rpx; margin-top: 6rpx; display: block; color: {{item.isActual ? '#07C160' : '#8A8A8A'}};">{{item.desc}}</text>
+        </view>
+      </view>
+
+      <!-- 本月资金流向（汇总） -->
+      <view class="card" style="margin: 24rpx;">
+        <text class="text-bold" style="font-size: 26rpx; display: block; margin-bottom: 16rpx;">本月资金流向</text>
+        <view class="flow-summary">
+          <view class="flow-item">
+            <text class="flow-label">总收入</text>
+            <text class="flow-value text-green">+¥{{totalIncome}}万</text>
+          </view>
+          <view class="flow-item">
+            <text class="flow-label">总支出</text>
+            <text class="flow-value text-red">-¥{{totalExpense}}万</text>
+          </view>
+          <view class="flow-divider"></view>
+          <view class="flow-item">
+            <text class="flow-label text-bold">净现金变动</text>
+            <text class="flow-value text-bold" style="color: {{netCashChange >= 0 ? '#07C160' : '#FA5151'}};">{{netCashChange >= 0 ? '+' : ''}}¥{{netCashChange}}万</text>
+          </view>
+        </view>
+      </view>
+
+      <!-- 录入/删除按钮（有记录时） -->
+      <view style="margin: 0 24rpx 24rpx; display: flex; gap: 16rpx;">
+        <button class="btn-primary" style="flex: 1;" bindtap="openActualModal">录入本月实际情况</button>
+        <button style="flex: 0 0 auto; background: #FEE2E2; color: #DC2626; border: none; border-radius: 20rpx; padding: 20rpx 24rpx; font-size: 26rpx; font-weight: 600;" bindtap="deleteMonthData">删除本月</button>
+      </view>
+    </block>
+
+    <!-- 无记录时的空状态 -->
+    <block wx:else>
+      <view style="margin: 48rpx 24rpx; text-align: center;">
+        <text style="font-size: 64rpx; display: block;">📋</text>
+        <text style="font-size: 28rpx; color: #374151; font-weight: 600; display: block; margin-top: 16rpx;">本月暂无收支记录</text>
+        <text style="font-size: 24rpx; color: #9CA3AF; display: block; margin-top: 8rpx;">点击下方按钮录入本月实际情况</text>
+      </view>
+      <!-- 录入按钮（无记录时只显示录入） -->
+      <view style="margin: 0 24rpx 24rpx;">
+        <button class="btn-primary" style="width: 100%;" bindtap="openActualModal">录入本月实际情况</button>
+      </view>
+    </block>
+
+    <!-- 净现金变动趋势（有记录月份） -->
+    <view class="card" style="margin: 0 24rpx 24rpx;">
+      <view class="flex-between" style="margin-bottom: 20rpx;">
+        <text class="text-bold" style="font-size: 26rpx;">净现金变动趋势</text>
+        <text class="text-desc" style="font-size: 22rpx;">有记录月份</text>
+      </view>
+      <view wx:if="{{cashTrend.length === 0}}" style="text-align: center; padding: 40rpx 0;">
+        <text class="text-desc" style="font-size: 22rpx;">暂无记录，录入后显示</text>
+      </view>
+      <view wx:else>
+        <view class="cash-chart">
+          <view class="cash-bar-wrap" wx:for="{{cashTrend}}" wx:key="key" bindtap="onCashBarTap" data-idx="{{index}}">
+            <view class="cash-bar-col">
+              <view wx:if="{{item.isPositive}}" style="height: {{item.barH}}rpx; background: {{item.color}}; border-radius: 6rpx 6rpx 0 0; width: 28rpx; min-height: 8rpx;"></view>
+              <view wx:elif="{{item.value == 0}}" style="height: 8rpx; background: #E5E5E5; border-radius: 4rpx; width: 28rpx;"></view>
+              <view wx:else style="height: {{item.barH}}rpx; background: {{item.color}}; border-radius: 0 0 6rpx 6rpx; width: 28rpx; min-height: 8rpx;"></view>
+            </view>
+            <text class="cash-bar-label" style="color: {{cashTrendSelected === index ? item.color : '#8A8A8A'}};">{{item.shortLabel}}</text>
+          </view>
+        </view>
+        <view wx:if="{{cashTrendSelected >= 0}}" class="cash-detail-tip">
+          <text style="font-size: 24rpx; color: #555;">{{cashTrend[cashTrendSelected].label}}</text>
+          <text style="font-size: 26rpx; font-weight: 600; margin-left: 16rpx; color: {{cashTrend[cashTrendSelected].color}};">{{cashTrend[cashTrendSelected].valueText}}</text>
+        </view>
+      </view>
+    </view>
+
+    <view style="height: 40rpx;"></view>
+  </scroll-view>
+</view>
+
+<!-- 实际情况录入弹窗 -->
+<view class="modal-mask" wx:if="{{showActualModal}}" bindtap="closeActualModal" catchtouchmove="preventMove"></view>
+<view class="modal-content" wx:if="{{showActualModal}}">
+  <view class="modal-header" catchtouchmove="preventMove">
+    <text class="text-desc" style="font-size: 26rpx;" bindtap="closeActualModal">取消</text>
+    <text class="text-bold" style="font-size: 28rpx;">录入本月实际情况</text>
+    <text style="font-size: 26rpx; color: #8A2BE2; font-weight: 600;" bindtap="saveActualData">保存</text>
+  </view>
+  <scroll-view scroll-y style="max-height: 65vh; padding: 20rpx 24rpx 60rpx; box-sizing: border-box;">
+    <!-- 收入 -->
+    <view class="simple-section">
+      <view class="simple-section-title">
+        <text class="simple-section-dot" style="background: #22C55E;"></text>
+        <text>💵 收入（万元）</text>
+      </view>
+      <view class="simple-row">
+        <text class="simple-label">主业税后</text>
+        <input type="digit" class="simple-input" placeholder="计划 3.5" value="{{actualData.mainIncome}}" bindinput="onActualInput" data-field="mainIncome"/>
+      </view>
+      <view class="simple-row">
+        <text class="simple-label">副业收入</text>
+        <input type="digit" class="simple-input" placeholder="0" value="{{actualData.sideIncome}}" bindinput="onActualInput" data-field="sideIncome"/>
+      </view>
+      <view class="simple-row last">
+        <text class="simple-label">奖金/一次性</text>
+        <input type="digit" class="simple-input" placeholder="0" value="{{actualData.bonus}}" bindinput="onActualInput" data-field="bonus"/>
+      </view>
+    </view>
+
+    <!-- 支出 -->
+    <view class="simple-section">
+      <view class="simple-section-title">
+        <text class="simple-section-dot" style="background: #FA5151;"></text>
+        <text>💳 支出（万元）</text>
+      </view>
+      <view class="simple-row">
+        <text class="simple-label">固定支出</text>
+        <input type="digit" class="simple-input" placeholder="计划 1.5" value="{{actualData.fixedExpense}}" bindinput="onActualInput" data-field="fixedExpense"/>
+      </view>
+      <view class="simple-row">
+        <text class="simple-label">房贷月供</text>
+        <input type="digit" class="simple-input" placeholder="0" value="{{actualData.mortgage}}" bindinput="onActualInput" data-field="mortgage"/>
+      </view>
+      <view class="simple-row">
+        <text class="simple-label">大额支出</text>
+        <input type="digit" class="simple-input" placeholder="0" value="{{actualData.bigExpense}}" bindinput="onActualInput" data-field="bigExpense"/>
+      </view>
+      <view class="simple-row last">
+        <text class="simple-label">其他支出</text>
+        <input type="digit" class="simple-input" placeholder="0" value="{{actualData.otherExpense}}" bindinput="onActualInput" data-field="otherExpense"/>
+      </view>
+    </view>
+
+    <!-- 自定义项目 -->
+    <view class="simple-section">
+      <view class="simple-section-title" style="justify-content: space-between;">
+        <view class="flex-row" style="gap: 12rpx;">
+          <text class="simple-section-dot" style="background: #F59E0B;"></text>
+          <text>✏️ 自定义项目</text>
+        </view>
+        <text class="simple-add-btn" bindtap="openCustomItemModal">+ 添加</text>
+      </view>
+      <block wx:if="{{customItems.length > 0}}">
+        <view class="simple-custom-item" wx:for="{{customItems}}" wx:key="index">
+          <view class="flex-between" style="margin-bottom: 6rpx;">
+            <text class="text-bold" style="font-size: 26rpx;">{{item.name}}</text>
+            <text style="font-size: 22rpx; color: #FA5151;" bindtap="removeCustomItem" data-index="{{index}}">删除</text>
+          </view>
+          <view class="flex-between">
+            <text class="text-desc" style="font-size: 22rpx;">{{item.categoryLabel}}{{item.note ? ' · ' + item.note : ''}}</text>
+            <text style="font-size: 26rpx; font-weight: 600; color: #8A2BE2;">¥{{item.amount}}万</text>
+          </view>
+        </view>
+      </block>
+      <view wx:else class="simple-empty">
+        <text>点击「+ 添加」自定义收支项目</text>
+      </view>
+    </view>
+
+    <!-- 备注 -->
+    <view class="simple-section">
+      <view class="simple-section-title">
+        <text class="simple-section-dot" style="background: #8B5CF6;"></text>
+        <text>📝 本月备注</text>
+      </view>
+      <input class="simple-input-full" placeholder="如：本月有额外支出..." value="{{actualData.note}}" bindinput="onActualInput" data-field="note"/>
+    </view>
+
+    <view style="height: 40rpx;"></view>
+  </scroll-view>
+</view>

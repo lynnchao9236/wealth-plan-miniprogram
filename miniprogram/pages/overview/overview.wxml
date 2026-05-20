@@ -1,0 +1,227 @@
+<!--pages/overview/overview.wxml - 总览页-->
+
+<!-- 密码验证弹窗 -->
+<view class="pwd-mask" wx:if="{{showPwdModal}}">
+  <view class="pwd-modal">
+    <view class="pwd-lock-icon">🔒</view>
+    <text class="pwd-title">请输入访问密码</text>
+    <text class="pwd-subtitle">此内容已加密保护</text>
+    <input
+      class="pwd-input"
+      type="text"
+      password="{{true}}"
+      placeholder="请输入密码"
+      value="{{pwdInput}}"
+      bindinput="onPwdInput"
+      bindconfirm="onPwdConfirm"
+      focus="{{true}}"
+    />
+    <text class="pwd-error" wx:if="{{pwdError}}">密码错误，请重试</text>
+    <button class="pwd-btn" bindtap="onPwdConfirm">确认</button>
+  </view>
+</view>
+
+<scroll-view scroll-y class="page-scroll" wx:if="{{!showPwdModal}}">
+  <!-- 资产卡片 -->
+  <view class="gradient-card-green" style="margin-top: 24rpx;">
+    <view class="flex-between" style="margin-bottom: 16rpx;">
+      <text class="text-sm opacity-80">当前净资产（预估）</text>
+      <text class="tag-white">{{phaseTag}}</text>
+    </view>
+    <text class="asset-big">¥{{currentAsset}}万</text>
+    <view class="flex-row" style="margin-top: 16rpx; gap: 16rpx;">
+      <text class="text-sm opacity-90">目标 ¥1000万</text>
+      <text class="text-sm opacity-90">·</text>
+      <text class="text-sm opacity-90">完成 {{progressPct}}%</text>
+    </view>
+    <view class="progress-bar">
+      <view class="progress-fill" style="width: {{progressPct}}%;"></view>
+    </view>
+  </view>
+
+  <!-- 核心指标 -->
+  <view class="metric-grid" style="margin-top: 24rpx;">
+    <view class="metric-item">
+      <text class="metric-value text-green">¥{{gap}}万</text>
+      <text class="metric-label">剩余缺口</text>
+    </view>
+    <view class="metric-item">
+      <text class="metric-value" style="color: #576B95;">15年</text>
+      <text class="metric-label">规划周期</text>
+    </view>
+    <view class="metric-item">
+      <text class="metric-value text-orange">¥1.5万</text>
+      <text class="metric-label">月固定支出</text>
+    </view>
+  </view>
+
+  <!-- 当前资产结构 -->
+  <view class="card" style="margin-top: 24rpx;">
+    <view class="flex-between" style="margin-bottom: 20rpx;">
+      <text class="text-bold">当前资产结构</text>
+      <view class="flex-row" style="gap: 16rpx;">
+        <text class="text-desc text-sm">净资产 ¥{{netAsset}}万</text>
+        <text style="font-size: 22rpx; color: #8B5CF6; background: #F3F0FF; padding: 6rpx 16rpx; border-radius: 20rpx;" bindtap="openAssetEditModal">✏️ 编辑</text>
+      </view>
+    </view>
+    <view class="asset-list">
+      <view class="asset-row" wx:for="{{assetItems}}" wx:key="name">
+        <view class="asset-dot" style="background: {{item.color}};"></view>
+        <text class="text-desc text-sm" style="flex:1;">{{item.name}}</text>
+        <text class="text-sm text-bold" style="color: {{item.color}};">{{item.valueText}}</text>
+        <view class="asset-bar-bg">
+          <view class="asset-bar-fill" style="width: {{item.pct}}%; background: {{item.color}};"></view>
+        </view>
+      </view>
+    </view>
+    <view class="tip-green" style="margin-top: 16rpx;">
+      💡 应急金目标¥20万
+    </view>
+  </view>
+
+  <!-- 资产变化趋势 -->
+  <view class="card" style="margin-top: 24rpx;">
+    <view class="flex-between" style="margin-bottom: 20rpx;">
+      <text class="text-bold">资产变化趋势</text>
+      <text class="text-desc text-sm">{{assetTrend.length > 0 ? (assetTrend.length >= 12 ? "按月" : "按天") : "每次更新"}}</text>
+    </view>
+    <view wx:if="{{assetTrend.length === 0}}" style="text-align: center; padding: 40rpx 0;">
+      <text class="text-desc" style="font-size: 22rpx;">更新资产后显示</text>
+    </view>
+    <view wx:else>
+      <!-- 柱状图 -->
+      <view class="asset-trend-chart">
+        <view class="asset-trend-bar-wrap" wx:for="{{assetTrend}}" wx:key="label" bindtap="onAssetTrendTap" data-idx="{{index}}">
+          <view style="height: {{item.barH}}rpx; background: {{item.color}}; border-radius: 6rpx 6rpx 0 0; width: 32rpx; min-height: 8rpx;"></view>
+          <text class="asset-trend-label" style="color: {{assetTrendSelected === index ? item.color : '#8A8A8A'}};">{{item.shortLabel}}</text>
+        </view>
+      </view>
+      <!-- 点击详情 -->
+      <view wx:if="{{assetTrendSelected >= 0}}" class="cash-detail-tip" style="margin-top: 16rpx;">
+        <text style="font-size: 22rpx; color: #555;">{{assetTrend[assetTrendSelected].label}}</text>
+        <text style="font-size: 26rpx; font-weight: 600; margin-left: 16rpx; color: #22C55E;">¥{{assetTrend[assetTrendSelected].valueText}}万</text>
+        <text wx:if="{{assetTrend[assetTrendSelected].diffText}}" style="font-size: 22rpx; margin-left: 12rpx; color: {{assetTrend[assetTrendSelected].diffColor}};">{{assetTrend[assetTrendSelected].diffText}}</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- 资产增长预测（纯文字版，小程序无需ECharts） -->
+  <view class="card" style="margin-top: 24rpx;">
+    <view class="flex-between" style="margin-bottom: 20rpx;">
+      <text class="text-bold">资产增长预测</text>
+      <text class="text-desc text-sm">2026 → 2041</text>
+    </view>
+    <view class="growth-timeline">
+      <view class="growth-item" wx:for="{{growthData}}" wx:key="year">
+        <view class="growth-year">{{item.year}}</view>
+        <view class="growth-bar-wrap">
+          <view class="growth-bar-fill" style="width: {{item.pct}}%; background: {{item.color}};"></view>
+        </view>
+        <view class="growth-value" style="color: {{item.color}};">¥{{item.asset}}万</view>
+      </view>
+    </view>
+    <view class="flex-row" style="margin-top: 12rpx; justify-content: flex-end; gap: 24rpx;">
+      <view class="flex-row" style="gap: 8rpx;">
+        <view style="width: 16rpx; height: 16rpx; border-radius: 50%; background: #07C160;"></view>
+        <text class="text-desc" style="font-size: 20rpx;">净资产</text>
+      </view>
+      <view class="flex-row" style="gap: 8rpx;">
+        <view style="width: 16rpx; height: 16rpx; border-radius: 50%; background: #FA5151;"></view>
+        <text class="text-desc" style="font-size: 20rpx;">目标 ¥1000万</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- 三阶段概览 -->
+  <view style="margin: 24rpx 24rpx 0;">
+    <text class="section-title">三阶段规划</text>
+  </view>
+  <view class="list-card" style="margin-top: 12rpx;">
+    <view class="list-item" wx:for="{{phases}}" wx:key="phase" bindtap="goPhase" data-phase="{{item.phase}}">
+      <view class="icon-circle" style="background: {{item.bgColor}};">
+        <text>{{item.emoji}}</text>
+      </view>
+      <view style="flex: 1; margin-left: 20rpx;">
+        <view class="flex-row" style="gap: 12rpx;">
+          <text class="text-bold text-sm">Phase {{item.phase}}</text>
+          <text class="text-desc" style="font-size: 22rpx;">{{item.period}}</text>
+        </view>
+        <text class="text-desc" style="font-size: 22rpx; margin-top: 4rpx;">{{item.desc}}</text>
+      </view>
+      <view style="text-align: right;">
+        <text class="text-bold text-sm" style="color: {{item.valueColor}};">¥{{item.target}}万</text>
+        <text class="text-desc" style="font-size: 22rpx;"> ›</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- 三条铁律 -->
+  <view style="margin: 24rpx 24rpx 0;">
+    <text class="section-title">⚡ 三条铁律</text>
+  </view>
+  <view class="list-card" style="margin-top: 12rpx; margin-bottom: 40rpx;">
+    <view class="list-item" wx:for="{{rules}}" wx:key="title">
+      <view class="icon-circle" style="background: {{item.bgColor}};">
+        <text style="font-size: 28rpx;">{{item.icon}}</text>
+      </view>
+      <view style="flex: 1; margin-left: 20rpx;">
+        <text class="text-bold text-sm">{{item.title}}</text>
+        <text class="text-desc" style="font-size: 22rpx; margin-top: 4rpx; display: block;">{{item.desc}}</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- 签名 -->
+  <view class="footer-sign">
+    <text class="text-desc" style="font-size: 20rpx;">由 With 通过自然语言生成</text>
+  </view>
+</scroll-view>
+
+<!-- 资产编辑弹窗 -->
+<view class="modal-mask" wx:if="{{showAssetEditModal}}" bindtap="closeAssetEditModal" catchtouchmove="preventMove"></view>
+<view class="modal-content" wx:if="{{showAssetEditModal}}">
+  <view class="modal-header" catchtouchmove="preventMove">
+    <text class="text-desc" style="font-size: 26rpx;" bindtap="closeAssetEditModal">取消</text>
+    <text class="text-bold" style="font-size: 26rpx;">编辑资产结构</text>
+    <text style="font-size: 26rpx; color: #8A2BE2; font-weight: 600;" bindtap="saveAssetEdit">保存</text>
+  </view>
+  <scroll-view scroll-y style="max-height: 60vh; padding: 24rpx 24rpx 40rpx;">
+    <view class="actual-section">
+      <view class="actual-field-row">
+        <view class="flex-row" style="gap: 8rpx; margin-bottom: 8rpx;">
+          <text class="field-tag" style="background: #DCFCE7; color: #047857;">银行现金基金</text>
+          <text class="text-desc" style="font-size: 22rpx;">万元</text>
+        </view>
+        <input type="digit" class="form-input" placeholder="50" value="{{assetEditData.cash}}" bindinput="onAssetEditInput" data-field="cash"/>
+      </view>
+      <view class="actual-field-row">
+        <view class="flex-row" style="gap: 8rpx; margin-bottom: 8rpx;">
+          <text class="field-tag" style="background: #DBEAFE; color: #1D4ED8;">股票持仓</text>
+          <text class="text-desc" style="font-size: 22rpx;">万元</text>
+        </view>
+        <input type="digit" class="form-input" placeholder="13" value="{{assetEditData.stock}}" bindinput="onAssetEditInput" data-field="stock"/>
+      </view>
+      <view class="actual-field-row">
+        <view class="flex-row" style="gap: 8rpx; margin-bottom: 8rpx;">
+          <text class="field-tag" style="background: #CFFAFE; color: #0E7490;">基金持仓</text>
+          <text class="text-desc" style="font-size: 22rpx;">万元</text>
+        </view>
+        <input type="digit" class="form-input" placeholder="9" value="{{assetEditData.fund}}" bindinput="onAssetEditInput" data-field="fund"/>
+      </view>
+      <view class="actual-field-row">
+        <view class="flex-row" style="gap: 8rpx; margin-bottom: 8rpx;">
+          <text class="field-tag" style="background: #EDE9FE; color: #6D28D9;">房产估值</text>
+          <text class="text-desc" style="font-size: 22rpx;">万元</text>
+        </view>
+        <input type="digit" class="form-input" placeholder="250" value="{{assetEditData.house}}" bindinput="onAssetEditInput" data-field="house"/>
+      </view>
+      <view class="actual-field-row">
+        <view class="flex-row" style="gap: 8rpx; margin-bottom: 8rpx;">
+          <text class="field-tag" style="background: #FEE2E2; color: #B91C1C;">房贷余额</text>
+          <text class="text-desc" style="font-size: 22rpx;">万元</text>
+        </view>
+        <input type="digit" class="form-input" placeholder="50" value="{{assetEditData.loan}}" bindinput="onAssetEditInput" data-field="loan"/>
+      </view>
+    </view>
+  </scroll-view>
+</view>

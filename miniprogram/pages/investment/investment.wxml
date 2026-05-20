@@ -1,0 +1,489 @@
+<!--pages/investment/investment.wxml - 投资页面-->
+<view class="page-wrap">
+  <!-- 持仓概览 -->
+  <view class="gradient-card-purple" style="margin-top: 20rpx;">
+    <view class="flex-between" style="margin-bottom: 16rpx;">
+      <text style="font-size: 24rpx; opacity: 0.8;">投资账户总市值</text>
+      <view class="update-btn" bindtap="openAccountPicker">✏️ 更新持仓</view>
+    </view>
+    <text style="font-size: 56rpx; font-weight: bold; display: block; margin-bottom: 8rpx;">¥{{totalValue}}万</text>
+    <view class="flex-row" style="gap: 16rpx; font-size: 24rpx; opacity: 0.9;">
+      <text>股票 ¥{{stockValue}}万</text>
+      <text>·</text>
+      <text>基金 ¥{{fundValue}}万</text>
+    </view>
+    <view class="flex-row" style="gap: 8rpx; margin-top: 16rpx; font-size: 22rpx; opacity: 0.7;">
+      <text style="font-size: 20rpx;">更新: {{updateTime}}</text>
+    </view>
+  </view>
+
+  <!-- Tab切换 -->
+  <view class="invest-tabs">
+    <view class="invest-tab {{currentTab === 'holding' ? 'active' : ''}}" bindtap="switchTab" data-tab="holding">📊 当前持仓</view>
+    <view class="invest-tab {{currentTab === 'advice' ? 'active' : ''}}" bindtap="switchTab" data-tab="advice">💡 购买建议</view>
+    <view class="invest-tab {{currentTab === 'history' ? 'active' : ''}}" bindtap="switchTab" data-tab="history">📈 历史记录</view>
+  </view>
+
+  <scroll-view scroll-y class="content-scroll" style="padding-bottom: 120rpx;">
+    <!-- 当前持仓 -->
+    <block wx:if="{{currentTab === 'holding'}}">
+      <!-- 股票账户 -->
+      <view style="margin: 20rpx 24rpx 0;">
+        <text style="font-size: 24rpx; color: #3B82F6; font-weight: 600;">📈 股票持仓</text>
+      </view>
+      <view wx:for="{{stockAccounts}}" wx:key="name" wx:for-index="accIdx" class="card" style="margin-top: 12rpx;">
+        <!-- 账户名 + 合计 + 编辑账户名按钮 -->
+        <view class="flex-between" style="margin-bottom: 16rpx; border-bottom: 1rpx solid #F0F0F0; padding-bottom: 12rpx;">
+          <view class="flex-row" style="gap: 12rpx; align-items: center;">
+            <text class="text-bold" style="font-size: 28rpx; color: #3B82F6;">🏦 {{item.name}}</text>
+            <view class="edit-acc-btn" bindtap="openAccRename" data-type="stock" data-idx="{{accIdx}}" data-name="{{item.name}}">✏️ 改名</view>
+          </view>
+          <view style="text-align: right;">
+            <text class="text-bold" style="font-size: 28rpx; color: #3B82F6;">¥{{item.totalValueText}}万</text>
+            <view wx:if="{{item.hasCost}}" style="font-size: 20rpx; margin-top: 2rpx;">
+              <text class="text-desc">成本 ¥{{item.totalCostText}}万 · </text>
+              <text style="color: {{item.totalProfitColor}}; font-weight: 600;">{{item.totalProfitText}}万 ({{item.totalProfitPctText}})</text>
+            </view>
+          </view>
+        </view>
+
+        <view wx:if="{{item.items.length === 0}}" style="padding: 20rpx 0; text-align: center;">
+          <text class="text-desc" style="font-size: 22rpx;">暂无持仓，点击「更新持仓」添加</text>
+        </view>
+
+        <!-- 持仓明细行，支持点击编辑 -->
+        <view class="holding-item" wx:for="{{item.items}}" wx:for-item="stock" wx:for-index="itemIdx" wx:key="name">
+          <view style="flex: 1;" bindtap="openItemEdit" data-type="stock" data-accidx="{{accIdx}}" data-itemidx="{{itemIdx}}">
+            <view class="flex-row" style="gap: 8rpx; flex-wrap: wrap;">
+              <text class="text-bold" style="font-size: 26rpx;">{{stock.name}}</text>
+              <text class="text-desc" style="font-size: 22rpx;" wx:if="{{stock.code}}">{{stock.code}}</text>
+              <text class="currency-tag" wx:if="{{stock.showCurrency}}">{{stock.currency}}</text>
+            </view>
+            <text class="text-desc" style="font-size: 20rpx; display: block; margin-top: 4rpx;" wx:if="{{stock.note}}">{{stock.note}}</text>
+          </view>
+          <view style="text-align: right; flex-shrink: 0;">
+            <text class="text-bold" style="font-size: 26rpx;">¥{{stock.valueText}}万</text>
+            <view wx:if="{{stock.hasCost}}" style="font-size: 20rpx; margin-top: 2rpx;">
+              <text class="text-desc">成本 ¥{{stock.costText}}万</text>
+            </view>
+            <view wx:if="{{stock.hasCost}}" style="font-size: 20rpx; margin-top: 2rpx;">
+              <text style="color: {{stock.profitColor}}; font-weight: 600;">{{stock.profitText}}万 {{stock.profitPctText}}</text>
+            </view>
+          </view>
+          <view class="item-del-btn" bindtap="deleteItem" data-type="stock" data-accidx="{{accIdx}}" data-itemidx="{{itemIdx}}">🗑</view>
+        </view>
+      </view>
+
+      <!-- 基金账户 -->
+      <view style="margin: 20rpx 24rpx 0;">
+        <text style="font-size: 24rpx; color: #06B6D4; font-weight: 600;">💎 基金持仓</text>
+      </view>
+      <view wx:for="{{fundAccounts}}" wx:key="name" wx:for-index="accIdx" class="card" style="margin-top: 12rpx;">
+        <!-- 账户名 + 合计 -->
+        <view class="flex-between" style="margin-bottom: 16rpx; border-bottom: 1rpx solid #F0F0F0; padding-bottom: 12rpx;">
+          <view class="flex-row" style="gap: 12rpx; align-items: center;">
+            <text class="text-bold" style="font-size: 28rpx; color: #06B6D4;">🏦 {{item.name}}</text>
+            <view class="edit-acc-btn fund-acc" bindtap="openAccRename" data-type="fund" data-idx="{{accIdx}}" data-name="{{item.name}}">✏️ 改名</view>
+          </view>
+          <view style="text-align: right;">
+            <text class="text-bold" style="font-size: 28rpx; color: #06B6D4;">¥{{item.totalValueText}}万</text>
+            <view wx:if="{{item.hasCost}}" style="font-size: 20rpx; margin-top: 2rpx;">
+              <text class="text-desc">成本 ¥{{item.totalCostText}}万 · </text>
+              <text style="color: {{item.totalProfitColor}}; font-weight: 600;">{{item.totalProfitText}}万 ({{item.totalProfitPctText}})</text>
+            </view>
+          </view>
+        </view>
+
+        <view wx:if="{{item.items.length === 0}}" style="padding: 20rpx 0; text-align: center;">
+          <text class="text-desc" style="font-size: 22rpx;">暂无持仓，点击「更新持仓」添加</text>
+        </view>
+
+        <view class="holding-item" wx:for="{{item.items}}" wx:for-item="fund" wx:for-index="itemIdx" wx:key="name">
+          <view style="flex: 1;" bindtap="openItemEdit" data-type="fund" data-accidx="{{accIdx}}" data-itemidx="{{itemIdx}}">
+            <view class="flex-row" style="gap: 8rpx; flex-wrap: wrap;">
+              <text class="text-bold" style="font-size: 26rpx;">{{fund.name}}</text>
+              <text class="text-desc" style="font-size: 22rpx;" wx:if="{{fund.code}}">{{fund.code}}</text>
+              <text class="currency-tag cyan-tag" wx:if="{{fund.showCurrency}}">{{fund.currency}}</text>
+            </view>
+            <text class="text-desc" style="font-size: 20rpx; display: block; margin-top: 4rpx;" wx:if="{{fund.note}}">{{fund.note}}</text>
+          </view>
+          <view style="text-align: right; flex-shrink: 0;">
+            <text class="text-bold" style="font-size: 26rpx;">¥{{fund.valueText}}万</text>
+            <view wx:if="{{fund.hasCost}}" style="font-size: 20rpx; margin-top: 2rpx;">
+              <text class="text-desc">成本 ¥{{fund.costText}}万</text>
+            </view>
+            <view wx:if="{{fund.hasCost}}" style="font-size: 20rpx; margin-top: 2rpx;">
+              <text style="color: {{fund.profitColor}}; font-weight: 600;">{{fund.profitText}}万 {{fund.profitPctText}}</text>
+            </view>
+          </view>
+          <view class="item-del-btn" bindtap="deleteItem" data-type="fund" data-accidx="{{accIdx}}" data-itemidx="{{itemIdx}}">🗑</view>
+        </view>
+      </view>
+
+      <view style="height: 40rpx;"></view>
+    </block>
+
+    <!-- 购买建议 -->
+    <block wx:if="{{currentTab === 'advice'}}">
+      <view class="card" style="margin-top: 20rpx;">
+        <view class="flex-between" style="margin-bottom: 8rpx;">
+          <text class="text-bold" style="font-size: 28rpx;">🌍 按地域配比</text>
+          <text class="text-desc" style="font-size: 22rpx;">合计 ¥{{allocTotalWan}}万</text>
+        </view>
+        <view class="alloc-legend">
+          <view class="legend-item"><view class="legend-dot legend-dot-target"></view><text>建议区间</text></view>
+          <view class="legend-item"><view class="legend-dot legend-dot-actual"></view><text>当前持仓</text></view>
+        </view>
+        <view wx:for="{{regionCompare}}" wx:key="key" class="alloc-row">
+          <view class="flex-between" style="margin-bottom: 8rpx;">
+            <view class="flex-row" style="gap: 10rpx;">
+              <text style="font-size: 26rpx; font-weight: 600;">{{item.label}}</text>
+              <view class="status-chip" style="color: {{item.statusColor}}; background: {{item.statusBg}};">{{item.status}}</view>
+            </view>
+            <text style="font-size: 22rpx; color: #8A8A8A;">偏差 {{item.diffText}}</text>
+          </view>
+          <view class="bar-row">
+            <text class="bar-label">建议</text>
+            <view class="bar-track">
+              <view class="bar-fill bar-fill-target" style="width: {{item.targetBarWidth}}%; background: {{item.color}};"></view>
+            </view>
+            <text class="bar-val" style="color: {{item.color}};">{{item.targetRange}}</text>
+          </view>
+          <view class="bar-row">
+            <text class="bar-label">当前</text>
+            <view class="bar-track">
+              <view class="bar-fill" style="width: {{item.actualBarWidth}}%; background: {{item.color}};"></view>
+            </view>
+            <text class="bar-val" style="color: {{item.color}};">{{item.actualPct}}%</text>
+          </view>
+          <text class="alloc-amount">¥{{item.actualAmount}}万</text>
+        </view>
+      </view>
+
+      <view class="card" style="margin-top: 20rpx;">
+        <view class="flex-between" style="margin-bottom: 8rpx;">
+          <text class="text-bold" style="font-size: 28rpx;">📦 按资产类型配比</text>
+          <text class="text-desc" style="font-size: 22rpx;">定投领航员方案</text>
+        </view>
+        <view class="alloc-legend">
+          <view class="legend-item"><view class="legend-dot legend-dot-target"></view><text>建议</text></view>
+          <view class="legend-item"><view class="legend-dot legend-dot-actual"></view><text>当前</text></view>
+        </view>
+        <view wx:for="{{typeGroups}}" wx:for-item="group" wx:key="name" class="type-group">
+          <view class="type-group-header">
+            <text class="type-group-name">{{group.name}}</text>
+            <text class="type-group-stat">建议 {{group.totalTarget}}% · 当前 {{group.totalActual}}%</text>
+          </view>
+          <view wx:for="{{group.items}}" wx:for-item="item" wx:key="key" class="alloc-row alloc-row-sub">
+            <view class="flex-between" style="margin-bottom: 6rpx;">
+              <text style="font-size: 24rpx; font-weight: 500;">{{item.label}}</text>
+              <view class="flex-row" style="gap: 10rpx;">
+                <view class="status-chip" style="color: {{item.statusColor}}; background: {{item.statusBg}};">{{item.status}}</view>
+                <text style="font-size: 22rpx; color: #8A8A8A;">{{item.diffText}}</text>
+              </view>
+            </view>
+            <view class="bar-row">
+              <text class="bar-label">建议</text>
+              <view class="bar-track">
+                <view class="bar-fill bar-fill-target" style="width: {{item.targetBarWidth}}%; background: {{item.color}};"></view>
+              </view>
+              <text class="bar-val" style="color: {{item.color}};">{{item.targetText}}</text>
+            </view>
+            <view class="bar-row">
+              <text class="bar-label">当前</text>
+              <view class="bar-track">
+                <view class="bar-fill" style="width: {{item.actualBarWidth}}%; background: {{item.color}};"></view>
+              </view>
+              <text class="bar-val" style="color: {{item.color}};">{{item.actualPct}}%</text>
+            </view>
+            <text class="alloc-amount">¥{{item.actualAmount}}万</text>
+          </view>
+        </view>
+      </view>
+
+      <view class="card" style="margin-top: 20rpx;">
+        <view class="flex-between" style="margin-bottom: 16rpx;">
+          <text class="text-bold" style="font-size: 28rpx;">💡 本月投资建议</text>
+          <text class="text-desc" style="font-size: 22rpx;">Phase {{advicePhase}} 配比</text>
+        </view>
+        <view class="tip-box" style="background: #F3F0FF; color: #6D28D9; margin-bottom: 16rpx;">
+          💰 本月可投资预算：¥{{adviceBudget}}万
+        </view>
+        <view class="advice-item" wx:for="{{adviceSuggestions}}" wx:key="category">
+          <view class="flex-between" style="margin-bottom: 8rpx; flex-wrap: wrap; gap: 4rpx;">
+            <text class="text-bold" style="font-size: 26rpx; flex-shrink: 0;">{{item.category}}</text>
+            <text class="text-desc" style="font-size: 22rpx; flex-shrink: 0;">目标占比 {{item.target}}</text>
+          </view>
+          <view class="advice-detail">
+            <view style="margin-bottom: 6rpx;">
+              <text style="font-size: 26rpx; color: #374151;">建议买入 </text>
+              <text style="font-size: 26rpx; font-weight: 600; color: #8B5CF6;">¥{{item.amount}}万</text>
+            </view>
+            <view class="flex-between" style="flex-wrap: wrap; gap: 4rpx;">
+              <text class="text-bold" style="font-size: 24rpx; color: #1F2937; flex-shrink: 0;">{{item.recommend.name}}</text>
+              <text class="text-desc" style="font-size: 22rpx; flex-shrink: 0;">{{item.recommend.reason}}</text>
+            </view>
+          </view>
+        </view>
+      </view>
+      <view style="height: 40rpx;"></view>
+    </block>
+
+    <!-- 历史记录 -->
+    <block wx:if="{{currentTab === 'history'}}">
+      <!-- 无记录提示 -->
+      <view wx:if="{{historyTrend.length === 0 && historyList.length === 0}}" class="card" style="margin-top: 20rpx; text-align: center; padding: 60rpx;">
+        <text class="text-desc" style="display: block; margin-top: 16rpx;">暂无历史持仓记录</text>
+      </view>
+
+      <!-- 分账户历史趋势 -->
+      <view wx:for="{{historyTrend}}" wx:key="accKey" wx:for-item="trend" class="card" style="margin-top: 16rpx;">
+        <view class="flex-between" style="margin-bottom: 16rpx; border-bottom: 1rpx solid #F0F0F0; padding-bottom: 12rpx;">
+          <text style="font-size: 28rpx; font-weight: 600; color: {{trend.typeColor}};">{{trend.typeLabel}} {{trend.accName}}</text>
+          <text style="font-size: 24rpx; color: #6B7280;">最新 ¥{{trend.latestValue}}万</text>
+        </view>
+        <view wx:for="{{trend.records}}" wx:key="label" wx:for-item="rec" style="padding: 14rpx 0; border-bottom: 1rpx solid #F8F8F8;">
+          <view class="flex-between" style="align-items: flex-start;">
+            <view style="flex: 1;">
+              <view class="flex-row" style="gap: 8rpx; align-items: center;">
+                <text style="font-size: 22rpx; color: #9CA3AF;">{{rec.label}}</text>
+                <view wx:if="{{rec.isLatest}}" style="background: #8B5CF6; border-radius: 6rpx; padding: 2rpx 8rpx;">
+                  <text style="font-size: 18rpx; color: #fff;">最新</text>
+                </view>
+              </view>
+            </view>
+            <view style="text-align: right; flex-shrink: 0;">
+              <text style="font-size: 26rpx; font-weight: 600; color: #1F2937;">¥{{rec.valueText}}万</text>
+              <view wx:if="{{rec.diffText !== '首次记录'}}" style="margin-top: 4rpx;">
+                <text style="font-size: 20rpx; font-weight: 600; color: {{rec.diffColor}};">{{rec.diffText}}</text>
+                <text style="font-size: 20rpx; color: {{rec.diffColor}};" wx:if="{{rec.diffPctText}}"> {{rec.diffPctText}}</text>
+              </view>
+              <text wx:if="{{rec.diffText === '首次记录'}}" style="font-size: 20rpx; color: #9CA3AF;">首次记录</text>
+            </view>
+          </view>
+        </view>
+      </view>
+
+      <view style="height: 40rpx;"></view>
+    </block>
+  </scroll-view>
+</view>
+
+<!-- ========== 步骤1：账户选择弹窗 ========== -->
+<view class="modal-mask" wx:if="{{showAccountPicker}}" bindtap="closeAccountPicker" catchtouchmove="preventMove"></view>
+<view class="modal-content acc-picker-modal" wx:if="{{showAccountPicker}}" catchtouchmove="preventMove">
+  <view class="modal-header">
+    <text class="text-desc" style="font-size: 26rpx;" bindtap="closeAccountPicker">取消</text>
+    <text class="text-bold" style="font-size: 28rpx;">选择要更新的账户</text>
+    <view style="width: 80rpx;"></view>
+  </view>
+  <scroll-view scroll-y style="max-height: 65vh; padding: 24rpx;">
+
+    <!-- 已有账户列表 -->
+    <view wx:if="{{pickerAccounts.length > 0}}">
+      <text style="font-size: 22rpx; color: #8A8A8A; display: block; margin-bottom: 12rpx;">已有账户（点击进入批量识别）</text>
+      <view wx:for="{{pickerAccounts}}" wx:key="idx" class="acc-picker-item" bindtap="selectAccount" data-type="{{item.type}}" data-idx="{{item.idx}}" data-name="{{item.name}}">
+        <view style="width: 56rpx; height: 56rpx; border-radius: 28rpx; background: {{item.type === 'stock' ? '#EFF6FF' : '#ECFEFF'}}; display: flex; align-items: center; justify-content: center;"><text style="font-size: 18rpx; font-weight: 600; color: {{item.type === 'stock' ? '#3B82F6' : '#06B6D4'}};">{{item.icon}}</text></view>
+        <view style="flex: 1; margin-left: 16rpx;">
+          <text style="font-size: 28rpx; font-weight: 600; color: {{item.type === 'stock' ? '#3B82F6' : '#06B6D4'}};">{{item.name}}</text>
+          <text style="font-size: 22rpx; color: #8A8A8A; display: block; margin-top: 4rpx;">{{item.type === 'stock' ? '股票账户' : '基金账户'}}</text>
+        </view>
+        <text style="font-size: 28rpx; color: #C0C4CC;">›</text>
+      </view>
+    </view>
+
+    <!-- 分割线 -->
+    <view style="margin: 24rpx 0; border-top: 1rpx solid #EEEEEE; position: relative;">
+      <text style="position: absolute; top: -18rpx; left: 50%; transform: translateX(-50%); background: #fff; padding: 0 16rpx; font-size: 22rpx; color: #AAAAAA;">或新增账户</text>
+    </view>
+
+    <!-- 新增账户 -->
+    <view style="background: #F9FAFB; border-radius: 16rpx; padding: 24rpx;">
+      <view class="edit-field-label" style="margin-bottom: 8rpx;">账户名称</view>
+      <input class="edit-field-input" placeholder="如：港股账户、美股账户" value="{{newAccName}}" bindinput="onNewAccNameInput" />
+
+      <view class="edit-field-label" style="margin: 16rpx 0 8rpx;">账户类型</view>
+      <view class="flex-row" style="gap: 16rpx;">
+        <view class="acc-type-btn {{newAccType === 'stock' ? 'acc-type-stock-active' : ''}}" bindtap="onNewAccTypeChange" data-type="stock">
+          <text style="font-size: 24rpx;">📈 股票账户</text>
+        </view>
+        <view class="acc-type-btn {{newAccType === 'fund' ? 'acc-type-fund-active' : ''}}" bindtap="onNewAccTypeChange" data-type="fund">
+          <text style="font-size: 24rpx;">💎 基金账户</text>
+        </view>
+      </view>
+
+      <view class="add-btn" bindtap="confirmAddAccount" style="margin-top: 20rpx;">
+        + 新增并进入批量识别
+      </view>
+    </view>
+  </scroll-view>
+</view>
+
+<!-- ========== 步骤2：批量识别弹窗 ========== -->
+<view class="modal-mask" wx:if="{{showBatchModal}}" bindtap="closeBatchModal" catchtouchmove="preventMove" style="z-index: 10099;"></view>
+<view class="batch-modal" wx:if="{{showBatchModal}}" catchtouchmove="preventMove">
+  <view class="batch-modal-header">
+    <text class="text-desc" style="font-size: 26rpx;" bindtap="closeBatchModal">取消</text>
+    <view style="text-align: center;">
+      <text class="text-bold" style="font-size: 28rpx;">{{batchType === 'stock' ? '📈 批量识别股票' : '💎 批量识别基金'}}</text>
+      <text style="font-size: 22rpx; color: #8A8A8A; display: block;">{{batchAccName}}</text>
+    </view>
+    <text style="font-size: 26rpx; color: #8B5CF6; font-weight: 600;" bindtap="confirmBatchImport">导入</text>
+  </view>
+
+  <scroll-view scroll-y style="max-height: 80vh;">
+    <!-- 输入区 -->
+    <view style="padding: 24rpx 24rpx 0;">
+      <view class="batch-tip-box">
+        <text style="font-size: 22rpx; color: #6D28D9; font-weight: 600; display: block; margin-bottom: 6rpx;">💡 格式：名称 成本 目前市值（每行一条，可含币种）</text>
+        <text style="font-size: 20rpx; color: #8B5CF6; display: block;">贵州茅台 48000 52000</text>
+        <text style="font-size: 20rpx; color: #8B5CF6; display: block;">苹果 USD 16000 18500</text>
+        <text style="font-size: 20rpx; color: #06B6D4; display: block;">腾讯控股 HKD 25000</text>
+        <text style="font-size: 20rpx; color: #8B5CF6; display: block;">510300 沪深300ETF 4500 5000</text>
+      </view>
+      <textarea
+        class="batch-textarea"
+        placeholder="在此粘贴或输入持仓信息，每行一条..."
+        value="{{batchText}}"
+        bindinput="onBatchTextInput"
+        auto-height
+        maxlength="3000"
+        style="min-height: 200rpx;"
+      />
+    </view>
+
+    <!-- 解析预览（支持编辑） -->
+    <view style="padding: 16rpx 24rpx 0;">
+      <view class="flex-between" style="margin-bottom: 12rpx;">
+        <text style="font-size: 24rpx; font-weight: 600; color: #333;">解析预览 <text style="font-size: 20rpx; color: #8A8A8A; font-weight: normal;">（可直接编辑）</text></text>
+        <text style="font-size: 22rpx; color: #8B5CF6;">{{batchPreviewCount}}</text>
+      </view>
+
+      <view wx:if="{{batchPreviewItems.length === 0}}" style="text-align: center; padding: 32rpx 0;">
+        <text class="text-desc" style="font-size: 22rpx;">输入内容后将实时解析预览</text>
+      </view>
+
+      <view wx:for="{{batchPreviewItems}}" wx:key="index" class="batch-preview-edit-card">
+        <view class="flex-between" style="margin-bottom: 12rpx;">
+          <view class="flex-row" style="gap: 8rpx; align-items: center;">
+            <view class="batch-preview-idx">{{index + 1}}</view>
+            <text style="font-size: 22rpx; color: #8A8A8A;">点击字段可编辑</text>
+          </view>
+          <text style="font-size: 22rpx; color: #FA5151;" bindtap="removePreviewItem" data-idx="{{index}}">✕ 删除</text>
+        </view>
+
+        <!-- 名称 -->
+        <view class="preview-edit-row">
+          <text class="preview-field-label">名称</text>
+          <input class="preview-field-input" value="{{item.name}}" placeholder="名称" bindinput="onPreviewItemInput" data-idx="{{index}}" data-field="name" />
+        </view>
+
+        <!-- 成本市值 + 当前市值 -->
+        <view class="flex-row" style="gap: 12rpx;">
+          <view style="flex: 1;">
+            <view class="preview-edit-row">
+              <text class="preview-field-label">成本</text>
+              <input class="preview-field-input" type="digit" value="{{item.cost}}" placeholder="0" bindinput="onPreviewItemInput" data-idx="{{index}}" data-field="cost" />
+            </view>
+          </view>
+          <view style="flex: 1;">
+            <view class="preview-edit-row">
+              <text class="preview-field-label">市值</text>
+              <input class="preview-field-input" type="digit" value="{{item.value}}" placeholder="0" bindinput="onPreviewItemInput" data-idx="{{index}}" data-field="value" />
+            </view>
+          </view>
+        </view>
+
+        <!-- 币种选择 -->
+        <view class="flex-row" style="gap: 10rpx; margin-top: 10rpx;">
+          <text class="preview-field-label" style="line-height: 52rpx;">币种</text>
+          <view class="preview-currency-btn {{item.currency === 'CNY' || !item.currency ? 'active' : ''}}" bindtap="onPreviewCurrencyChange" data-idx="{{index}}" data-currency="CNY">CN¥</view>
+          <view class="preview-currency-btn {{item.currency === 'USD' ? 'active' : ''}}" bindtap="onPreviewCurrencyChange" data-idx="{{index}}" data-currency="USD">US$</view>
+          <view class="preview-currency-btn {{item.currency === 'HKD' ? 'active' : ''}}" bindtap="onPreviewCurrencyChange" data-idx="{{index}}" data-currency="HKD">HK$</view>
+        </view>
+      </view>
+    </view>
+
+    <!-- 底部确认按钮 -->
+    <view style="padding: 24rpx;">
+      <view class="batch-confirm-btn {{batchType === 'stock' ? 'stock-btn' : 'fund-btn'}}" bindtap="confirmBatchImport">
+        导入 {{batchPreviewItems.length}} 条持仓到「{{batchAccName}}」
+      </view>
+    </view>
+  </scroll-view>
+</view>
+
+<!-- ========== 单项编辑弹窗 ========== -->
+<view class="modal-mask" wx:if="{{showItemEditModal}}" bindtap="closeItemEdit" catchtouchmove="preventMove" style="z-index: 10199;"></view>
+<view class="modal-content item-edit-modal" wx:if="{{showItemEditModal}}" catchtouchmove="preventMove">
+  <view class="modal-header">
+    <text class="text-desc" style="font-size: 26rpx;" bindtap="closeItemEdit">取消</text>
+    <text class="text-bold" style="font-size: 28rpx;">编辑{{editItemType === 'stock' ? '股票' : '基金'}}</text>
+    <text style="font-size: 26rpx; color: #8B5CF6; font-weight: 600;" bindtap="confirmItemEdit">保存</text>
+  </view>
+  <scroll-view scroll-y style="max-height: 60vh; padding: 24rpx;">
+
+    <view class="edit-field-label">名称</view>
+    <input class="edit-field-input" placeholder="名称" value="{{editItem.name}}" bindinput="onEditItemInput" data-field="name" />
+
+    <view class="edit-field-label" style="margin-top: 16rpx;">代码（选填）</view>
+    <input class="edit-field-input" placeholder="如：600519" value="{{editItem.code}}" bindinput="onEditItemInput" data-field="code" />
+
+    <view class="edit-field-label" style="margin-top: 16rpx;">💱 币种</view>
+    <view class="currency-selector">
+      <view class="currency-btn {{editItem.currency === 'CNY' || !editItem.currency ? 'active' : ''}}" bindtap="onEditItemCurrencyChange" data-currency="CNY">
+        <text>CN</text><text>人民币</text>
+      </view>
+      <view class="currency-btn {{editItem.currency === 'USD' ? 'active' : ''}}" bindtap="onEditItemCurrencyChange" data-currency="USD">
+        <text>US</text><text>美元</text>
+      </view>
+      <view class="currency-btn {{editItem.currency === 'HKD' ? 'active' : ''}}" bindtap="onEditItemCurrencyChange" data-currency="HKD">
+        <text>HK</text><text>港币</text>
+      </view>
+    </view>
+
+    <view class="flex-row" style="gap: 16rpx; margin-top: 16rpx;">
+      <view style="flex: 1;">
+        <view class="edit-field-label">持仓成本（原币）</view>
+        <input class="edit-field-input" type="digit" placeholder="0.00" value="{{editItem.cost}}" bindinput="onEditItemInput" data-field="cost" />
+      </view>
+      <view style="flex: 1;">
+        <view class="edit-field-label">当前市值（原币）</view>
+        <input class="edit-field-input" type="digit" placeholder="0.00" value="{{editItem.value}}" bindinput="onEditItemInput" data-field="value" />
+      </view>
+    </view>
+
+    <view class="edit-field-label" style="margin-top: 16rpx;">备注（选填）</view>
+    <textarea class="edit-field-textarea" placeholder="选填" value="{{editItem.note}}" bindinput="onEditItemInput" data-field="note" auto-height maxlength="200" />
+
+    <view style="height: 20rpx;"></view>
+  </scroll-view>
+</view>
+
+<!-- ========== 账户改名弹窗 ========== -->
+<view class="modal-mask" wx:if="{{showAccRenameModal}}" bindtap="closeAccRename" catchtouchmove="preventMove" style="z-index: 10299;"></view>
+<view class="modal-content acc-rename-modal" wx:if="{{showAccRenameModal}}" catchtouchmove="preventMove">
+  <view class="modal-header">
+    <text class="text-desc" style="font-size: 26rpx;" bindtap="closeAccRename">取消</text>
+    <text class="text-bold" style="font-size: 28rpx;">修改账户名</text>
+    <text style="font-size: 26rpx; color: #8B5CF6; font-weight: 600;" bindtap="confirmAccRename">保存</text>
+  </view>
+  <view style="padding: 24rpx;">
+    <view class="edit-field-label">账户名称</view>
+    <input class="edit-field-input" placeholder="请输入新名称" value="{{renameAccValue}}" bindinput="onRenameAccInput" focus="{{showAccRenameModal}}" />
+    <view style="margin-top: 24rpx;">
+      <view class="edit-field-label">账户类型</view>
+      <view class="flex-row" style="gap: 16rpx; margin-top: 12rpx;">
+        <view bindtap="onRenameAccNewTypeChange" data-type="stock"
+          style="flex: 1; padding: 16rpx; border-radius: 16rpx; text-align: center; border: 2rpx solid {{renameAccNewType === 'stock' ? '#3B82F6' : '#E5E7EB'}}; background: {{renameAccNewType === 'stock' ? '#EFF6FF' : '#F9FAFB'}};">
+          <text style="font-size: 26rpx; font-weight: 600; color: {{renameAccNewType === 'stock' ? '#3B82F6' : '#9CA3AF'}};">📈 股票</text>
+        </view>
+        <view bindtap="onRenameAccNewTypeChange" data-type="fund"
+          style="flex: 1; padding: 16rpx; border-radius: 16rpx; text-align: center; border: 2rpx solid {{renameAccNewType === 'fund' ? '#06B6D4' : '#E5E7EB'}}; background: {{renameAccNewType === 'fund' ? '#ECFEFF' : '#F9FAFB'}};">
+          <text style="font-size: 26rpx; font-weight: 600; color: {{renameAccNewType === 'fund' ? '#06B6D4' : '#9CA3AF'}};">💎 基金</text>
+        </view>
+      </view>
+      <text wx:if="{{renameAccNewType !== renameAccType}}" style="font-size: 22rpx; color: #F59E0B; display: block; margin-top: 12rpx;">⚠️ 类型变更后，账户将被迁移至对应持仓列表</text>
+    </view>
+  </view>
+</view>

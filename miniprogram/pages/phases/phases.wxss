@@ -1,0 +1,109 @@
+/* pages/phases/phases.wxss */
+.page-wrap {
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background: #F6F6F6;
+}
+
+.content-scroll {
+  flex: 1;
+  overflow: hidden;
+}
+
+.gradient-card {
+  border-radius: 32rpx;
+  padding: 36rpx;
+  margin: 0 24rpx;
+}
+
+.flex-row {
+  display: flex;
+  align-items: center;
+}
+
+.text-bold { font-weight: 600; }
+.text-desc { color: #8A8A8A; }
+
+/* 策略列表 */
+.strategy-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 16rpx;
+  padding: 16rpx 0;
+  border-bottom: 1rpx solid #F0F0F0;
+}
+
+.strategy-item:last-child {
+  border-bottom: none;
+}
+
+.strategy-icon {
+  width: 56rpx;
+  height: 56rpx;
+  border-radius: 14rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+/* 配比条 */
+.ratio-item {
+  display: flex;
+  align-items: center;
+  gap: 16rpx;
+  margin-bottom: 16rpx;
+}
+
+.ratio-bar {
+  width: 200rpx;
+  height: 14rpx;
+  background: #F0F0F0;
+  border-radius: 7rpx;
+  flex-shrink: 0;
+}
+
+.ratio-fill {
+  height: 14rpx;
+  border-radius: 7rpx;
+}
+
+/* 资金流 */
+.fund-flow {
+  background: #F9F9F9;
+  border-radius: 16rpx;
+  padding: 16rpx;
+}
+
+.fund-row {
+  display: flex;
+  justify-content: space-between;
+  padding: 10rpx 0;
+  border-bottom: 1rpx solid #F0F0F0;
+}
+
+.fund-row:last-child {
+  border-bottom: none;
+}
+
+/* 里程碑 */
+.milestone-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 16rpx;
+  padding: 16rpx 0;
+  border-bottom: 1rpx solid #F0F0F0;
+}
+
+.milestone-item:last-child {
+  border-bottom: none;
+}
+
+.milestone-dot {
+  width: 16rpx;
+  height: 16rpx;
+  border-radius: 50%;
+  flex-shrink: 0;
+  margin-top: 8rpx;
+}

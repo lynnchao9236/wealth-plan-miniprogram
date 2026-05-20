@@ -1,0 +1,44 @@
+{
+  "pages": [
+    "pages/overview/overview",
+    "pages/monthly/monthly",
+    "pages/phases/phases",
+    "pages/records/records",
+    "pages/investment/investment"
+  ],
+  "window": {
+    "navigationBarBackgroundColor": "#ffffff",
+    "navigationBarTitleText": "建阳女·财富计划",
+    "navigationBarTextStyle": "black",
+    "backgroundColor": "#F6F6F6",
+    "backgroundTextStyle": "dark"
+  },
+  "tabBar": {
+    "custom": true,
+    "color": "#8A8A8A",
+    "selectedColor": "#07C160",
+    "backgroundColor": "#FFFFFF",
+    "borderStyle": "white",
+    "list": [
+      {
+        "pagePath": "pages/overview/overview",
+        "text": "总览"
+      },
+      {
+        "pagePath": "pages/monthly/monthly",
+        "text": "每月收支"
+      },
+      {
+        "pagePath": "pages/investment/investment",
+        "text": "每月投资"
+      },
+      {
+        "pagePath": "pages/phases/phases",
+        "text": "阶段目标"
+      }
+    ]
+  },
+  "style": "v2",
+  "sitemapLocation": "sitemap.json",
+  "lazyCodeLoading": "requiredComponents"
+}
